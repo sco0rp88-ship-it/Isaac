@@ -371,6 +371,14 @@ class IsaacKernel:
             f"Input: '{user_input[:50]}' │ Intent: {intent} │ "
             f"Node: {emp.node.zustand} │ Sudo: {sudo_aktiv}"
         )
+        if interaction_class == InteractionClass.TOOL_REQUEST:
+            log.debug(
+                "Tool request heuristic: input='%s' interaction_class=%s detected_intent=%s resolved_intent=%s",
+                user_input[:80],
+                interaction_class,
+                detected_intent,
+                intent,
+            )
 
         blocked_msg, constitution_gate = self._enforce_constitution_gate(
             user_input, intent, sudo_aktiv
