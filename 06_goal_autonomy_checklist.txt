@@ -51,7 +51,10 @@ LIVE VALIDATION 2026-07-17 (Codespace + Render Fenster)
 ──────────────────────────────────────────────────────────────────────────────
 [x] Render https://isaac-free.onrender.com/health → ok free_cloud openrouter
 [x] scripts/smoke_isaac.py hard_fail=0 (CS ports soft 404 ohne Kernel)
-[x] unittest 244 OK
-[ ] Manuell Kernel im CS: bash .devcontainer/start-isaac.sh → Port 8767
-    (API startet Codespace VM, startet nicht automatisch isaac_core)
+[x] unittest 244+ OK
+[x] start_isaac.sh portabel (kein /root/Isaac/isaac)
+[x] Codespaces ISAAC_UNIFIED_PORT=1 (Dashboard+/ws, kein nackter WS-Tab)
+[x] Doku: Port 8766 vs 8765 Connection-header-Falle
+[ ] Manuell Kernel im CS: bash .devcontainer/start-isaac.sh → Port **8766**
+    (API startet nur VM; Owner muss Kernel-Prozess starten)
 
