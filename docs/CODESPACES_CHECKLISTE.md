@@ -124,3 +124,19 @@ test -x .venv/bin/python || bash .devcontainer/post-create.sh
 # Kernel (eigenes Terminal-Tab lassen laufen):
 bash .devcontainer/start-isaac.sh
 ```
+
+## Smoke-Suite (A–G + Digest + Render)
+
+```bash
+# Lokal / Codespace (ohne Secrets im Output):
+ISAAC_DISABLE_VECTOR_MEMORY=1 python3 scripts/smoke_isaac.py
+
+# Schnell ohne unittest:
+python3 scripts/smoke_isaac.py --skip-unittest
+
+# Live Render + Codespace-Ports (404 = soft, außer --strict-live):
+python3 scripts/smoke_isaac.py \
+  --render https://isaac-free.onrender.com \
+  --codespace-host isaac-main-qvvrvv7vg6xjc6x74.github.dev \
+  --codespace-ports 8766,8767
+```
