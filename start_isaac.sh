@@ -20,9 +20,13 @@ export DASHBOARD_PORT="${DASHBOARD_PORT:-8766}"
 export MONITOR_HTTP_PORT="${MONITOR_HTTP_PORT:-8766}"
 export PYTHONUNBUFFERED=1
 
-# In Codespaces / Free-Cloud an allen Interfaces binden
+# In Codespaces / Free-Cloud an allen Interfaces binden + Unified WS (/ws am HTTP-Port)
 if [ -n "${CODESPACES:-}" ] || [ -n "${GITHUB_CODESPACE_TOKEN:-}" ] || [ "${ISAAC_FREE_CLOUD:-0}" = "1" ]; then
   export ISAAC_BIND_HOST="${ISAAC_BIND_HOST:-0.0.0.0}"
+  # Browser-Tab auf :8765 zeigt "missing Connection header" — Dashboard-Port + /ws nutzen
+  if [ -n "${CODESPACES:-}" ] || [ -n "${GITHUB_CODESPACE_TOKEN:-}" ]; then
+    export ISAAC_UNIFIED_PORT="${ISAAC_UNIFIED_PORT:-1}"
+  fi
 fi
 
 echo "┌──────────────────────────────┐"

@@ -27,7 +27,12 @@ export MONITOR_HTTP_PORT="${MONITOR_HTTP_PORT:-8766}"
 export PYTHONUNBUFFERED=1
 export PYTHONDONTWRITEBYTECODE=1
 
-# Codespaces: bind so port forward works
+# Codespaces: bind + single public port (HTTP + /ws) — raw :8765 is not openable in a browser tab
+if [ -n "${CODESPACES:-}" ] || [ -n "${GITHUB_CODESPACE_TOKEN:-}" ]; then
+  export ISAAC_BIND_HOST="${ISAAC_BIND_HOST:-0.0.0.0}"
+  # Same-origin WebSocket on the dashboard port (required behind github.dev HTTPS)
+  export ISAAC_UNIFIED_PORT="${ISAAC_UNIFIED_PORT:-1}"
+fi
 export ISAAC_BIND_HOST="${ISAAC_BIND_HOST:-0.0.0.0}"
 
 if [ -z "${GROQ_API_KEY:-}" ] && [ -z "${OPENROUTER_API_KEY:-}" ] && [ -z "${GOOGLE_API_KEY:-}" ] && [ -z "${GEMINI_API_KEY:-}" ]; then
@@ -37,6 +42,12 @@ if [ -z "${GROQ_API_KEY:-}" ] && [ -z "${OPENROUTER_API_KEY:-}" ] && [ -z "${GOO
   echo "         Lightweight-Pfade (Hallo/Danke) funktionieren trotzdem lokal."
 fi
 
-echo "[Isaac] Starte Kernel (Dashboard :${MONITOR_HTTP_PORT}, WS :${MONITOR_PORT})"
+echo "[Isaac] Starte Kernel (Dashboard HTTP :${MONITOR_HTTP_PORT})"
+if [ "${ISAAC_UNIFIED_PORT:-0}" = "1" ]; then
+  echo "[Isaac] Unified-Port: WebSocket unter derselben URL → /ws"
+  echo "[Isaac] Codespaces: Panel PORTS → ${MONITOR_HTTP_PORT} Public → Browser (NICHT den reinen WS-Port 8765)"
+else
+  echo "[Isaac] WebSocket separat :${MONITOR_PORT}"
+fi
 echo "[Isaac] Provider: ${ACTIVE_PROVIDER:-groq}"
 exec .venv/bin/python isaac_core.py
