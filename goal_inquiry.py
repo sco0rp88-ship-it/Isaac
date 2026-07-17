@@ -143,7 +143,30 @@ class GoalInquiryStore:
         item.updated_at = _now()
         self.items[item.id] = item
         self.save()
+        AuditLog.action("GoalInquiry", "answered", f"{item.goal_id}:{item.id}")
         return item
+
+    def find_open(self, query: str = "") -> Optional[GoalInquiry]:
+        """Findet offene Inquiry per id, id-Suffix oder Frage-Substring.
+
+        Leerer query → neueste offene Frage (Owner-Kurzform: Ziel-Antwort: …).
+        """
+        open_items = self.list_open()
+        if not open_items:
+            return None
+        q = (query or "").strip().lower()
+        if not q:
+            return open_items[0]
+        for item in open_items:
+            if item.id.lower() == q or item.id.lower().endswith(q) or q in item.id.lower():
+                return item
+        for item in open_items:
+            if q in (item.question or "").lower():
+                return item
+        for item in open_items:
+            if q in (item.goal_id or "").lower() or (item.goal_id or "").lower().endswith(q):
+                return item
+        return None
 
     def format_open_block(self, *, limit: int = 5) -> str:
         open_items = self.list_open()[:limit]
@@ -151,7 +174,10 @@ class GoalInquiryStore:
             return "Goal-Fragen:  – keine offenen"
         lines = [f"Goal-Fragen:  {len(self.list_open())} offen"]
         for item in open_items:
-            lines.append(f"  · [{item.goal_id[-8:]}] {item.question[:90]}")
+            lines.append(
+                f"  · q={item.id[-8:]} goal={item.goal_id[-8:]} {item.question[:80]}"
+            )
+        lines.append("  Antwort: Ziel-Antwort: <frage|id> = <text>  |  Ziel-Antwort: <text>")
         return "\n".join(lines)
 
 
@@ -176,6 +202,89 @@ def reset_inquiry_store_for_tests(path: Path | None = None) -> GoalInquiryStore:
     _inq_store = GoalInquiryStore(path=target)
     return _inq_store
 
+
+_GOAL_ANSWER_RE = re.compile(
+    r"^(?:ziel-?antwort|goal-?antwort|goal answer|frage antwort|inquiry answer)\s*:\s*(.+)$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def parse_inquiry_answer_command(text: str) -> Optional[dict[str, Any]]:
+    """Parst Owner-Antwort auf Goal-Inquiry.
+
+    Formate:
+      Ziel-Antwort: <antworttext>                  → neueste offene Frage
+      Ziel-Antwort: <id|fragment> = <antworttext>  → gezielte Frage
+    """
+    raw = (text or "").strip()
+    if not raw:
+        return None
+    m = _GOAL_ANSWER_RE.match(raw)
+    if not m:
+        return None
+    body = m.group(1).strip()
+    if not body:
+        return None
+    if "=" in body:
+        left, right = body.split("=", 1)
+        left, right = left.strip(), right.strip()
+        if left and right:
+            return {"op": "answer", "query": left, "answer": right}
+    return {"op": "answer", "query": "", "answer": body}
+
+
+def apply_owner_inquiry_answer(
+    answer_text: str,
+    *,
+    query: str = "",
+    inquiry_store: Optional[GoalInquiryStore] = None,
+) -> dict[str, Any]:
+    """Wendet Owner-Antwort an, speichert optional Fact an goal_id. Fail-soft."""
+    store = inquiry_store or get_inquiry_store()
+    item = store.find_open(query)
+    if not item:
+        return {
+            "ok": False,
+            "reason": "no_open_inquiry",
+            "message": (
+                "[Goal-Antwort] Keine passende offene Frage.\n"
+                "Zeige offene: ziele digest\n"
+                "Format: Ziel-Antwort: <text>  oder  Ziel-Antwort: <id|fragment> = <text>"
+            ),
+        }
+    answered = store.answer(item.id, answer_text)
+    if not answered:
+        return {"ok": False, "reason": "answer_failed", "message": "[Goal-Antwort] Speichern fehlgeschlagen."}
+
+    # Persist as owner fact bound to goal (learning provenance)
+    try:
+        from memory import get_memory
+
+        mem = get_memory()
+        key = f"goal_answer.{item.goal_id}.{item.id[-8:]}"
+        mem.set_fact(
+            key,
+            f"Q: {item.question[:120]} → A: {(answer_text or '')[:300]}",
+            source=f"goal:{item.goal_id}",
+            confidence=0.9,
+        )
+    except Exception as exc:
+        log.debug("goal answer fact: %s", exc)
+
+    msg = (
+        f"[Goal-Antwort] ✓ Gespeichert\n"
+        f"Frage: {item.question[:120]}\n"
+        f"Antwort: {(answer_text or '')[:300]}\n"
+        f"goal_id={item.goal_id} │ inquiry={item.id}"
+    )
+    return {
+        "ok": True,
+        "inquiry_id": item.id,
+        "goal_id": item.goal_id,
+        "question": item.question,
+        "answer": answer_text,
+        "message": msg,
+    }
 
 def choose_work_mode(
     goal: OwnerGoal,

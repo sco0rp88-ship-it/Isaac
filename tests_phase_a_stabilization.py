@@ -3305,6 +3305,51 @@ class TestPhase4Connect(unittest.TestCase):
             self.assertIn(g.id, formatted)
             self.assertIn("Retrieval-Test", formatted)
 
+    def test_goal_owner_answer_to_inquiry(self):
+        """Owner beantwortet offene Goal-Inquiry via Ziel-Antwort:."""
+        import tempfile
+        from pathlib import Path
+        from goal_store import reset_goal_store_for_tests
+        from goal_inquiry import (
+            apply_owner_inquiry_answer,
+            parse_inquiry_answer_command,
+            reset_inquiry_store_for_tests,
+        )
+        from isaac_core import detect_intent, Intent, IsaacKernel
+
+        self.assertEqual(detect_intent("Ziel-Antwort: Budget ist 100"), Intent.GOAL_ANSWER)
+        cmd = parse_inquiry_answer_command("Ziel-Antwort: Mobile priorisieren")
+        self.assertEqual(cmd["op"], "answer")
+        self.assertEqual(cmd["query"], "")
+        self.assertIn("Mobile", cmd["answer"])
+        cmd2 = parse_inquiry_answer_command("Ziel-Antwort: budget = 500 Euro")
+        self.assertEqual(cmd2["query"].lower(), "budget")
+        self.assertIn("500", cmd2["answer"])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            gstore = reset_goal_store_for_tests(Path(tmp) / "g.json")
+            istore = reset_inquiry_store_for_tests(Path(tmp) / "i.json")
+            goal = gstore.add_owner_goal("Antwort-Ziel", priority=0.8)
+            item = istore.add(goal.id, "Welches Budget hat Priorität?")
+            out = apply_owner_inquiry_answer(
+                "Max 200 Euro",
+                query="Budget",
+                inquiry_store=istore,
+            )
+            self.assertTrue(out.get("ok"))
+            self.assertEqual(out.get("inquiry_id"), item.id)
+            self.assertEqual(len(istore.list_open()), 0)
+            answered = istore.items[item.id]
+            self.assertEqual(answered.status, "answered")
+            self.assertIn("200", answered.answer)
+
+            kernel = object.__new__(IsaacKernel)
+            # second inquiry + handler
+            item2 = istore.add(goal.id, "Desktop oder Mobile?")
+            msg = kernel._handle_goal_answer("Ziel-Antwort: Mobile")
+            self.assertIn("Gespeichert", msg)
+            self.assertEqual(istore.items[item2.id].status, "answered")
+
     def test_goal_digest_channel_bundles_inquiries_and_rate_limits(self):
         """Slice 4: gebündelter Digest-Kanal + Rate-Limit."""
         import tempfile

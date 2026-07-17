@@ -87,6 +87,7 @@ class Intent:
     GOAL_SET    = "goal_set"
     GOAL_LIST   = "goal_list"
     GOAL_DIGEST = "goal_digest"
+    GOAL_ANSWER = "goal_answer"
     DIRECTIVE   = "directive"
     STATUS      = "status"
     KI_STATUS   = "ki_status"   # KI-Dialog + Skill-Übersicht
@@ -131,6 +132,13 @@ EXPLICIT_COMMAND_PATTERNS = [
         r"^digest\s+ziele?$",
         r"^ziel-digest$",
         r"^goal-digest$",
+    ]),
+    (Intent.GOAL_ANSWER, [
+        r"^ziel-?antwort\s*:",
+        r"^goal-?antwort\s*:",
+        r"^goal answer\s*:",
+        r"^frage antwort\s*:",
+        r"^inquiry answer\s*:",
     ]),
     (Intent.DIRECTIVE,  [r"^direktive:", r"^immer:", r"^niemals:"]),
     (Intent.BROADCAST,  [r"^broadcast:", r"^alle instanzen:", r"^frage alle"]),
@@ -420,6 +428,7 @@ class IsaacKernel:
             Intent.GOAL_SET:   self._handle_goal,
             Intent.GOAL_LIST:  self._handle_goal_list,
             Intent.GOAL_DIGEST: self._handle_goal_digest,
+            Intent.GOAL_ANSWER: self._handle_goal_answer,
             Intent.DIRECTIVE:  self._handle_directive,
             Intent.STATUS:     self._handle_status,
             Intent.KI_STATUS:  self._handle_ki_status,
@@ -1815,6 +1824,24 @@ class IsaacKernel:
             pass
         return text
 
+    def _handle_goal_answer(self, text: str) -> str:
+        """Owner beantwortet offene Goal-Inquiry (Digest-Fragen)."""
+        from goal_inquiry import apply_owner_inquiry_answer, parse_inquiry_answer_command
+
+        cmd = parse_inquiry_answer_command(text)
+        if not cmd or cmd.get("op") != "answer":
+            return (
+                "[Goal-Antwort] Format:\n"
+                "  Ziel-Antwort: <deine Antwort>          → neueste offene Frage\n"
+                "  Ziel-Antwort: <id|fragment> = <Antwort> → gezielte Frage\n"
+                "Offene Fragen: ziele digest"
+            )
+        result = apply_owner_inquiry_answer(
+            str(cmd.get("answer") or ""),
+            query=str(cmd.get("query") or ""),
+        )
+        return str(result.get("message") or "[Goal-Antwort] Fehler")
+
     async def _handle_directive(self, text: str) -> str:
         m = re.match(r'^(?:direktive|immer|niemals):\s*(.+)$', text, re.I)
         if m:
@@ -2001,6 +2028,7 @@ class IsaacKernel:
             Intent.GOAL_SET: ("ziel:", "goal:", "mein ziel:", "meine ziele:", "ziel erledigt:", "ziel pause:"),
             Intent.GOAL_LIST: ("ziele", "meine ziele", "list goals"),
             Intent.GOAL_DIGEST: ("ziele digest", "ziel digest", "goal digest", "digest ziele"),
+            Intent.GOAL_ANSWER: ("ziel-antwort:", "zielantwort:", "goal-antwort:", "goal antwort:", "frage antwort:"),
             Intent.DIRECTIVE: ("direktive:", "immer:", "niemals:"),
             Intent.BROADCAST: ("broadcast:", "alle instanzen:", "frage alle"),
             Intent.SPLIT: ("split:", "aufteilen:"),
