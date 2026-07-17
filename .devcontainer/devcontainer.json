@@ -1,35 +1,143 @@
 {
-	"name": "Isaac",
-	"image": "mcr.microsoft.com/devcontainers/python:3.12",
-	"postCreateCommand": "bash .devcontainer/post-create.sh",
-	"containerEnv": {
-		"ISAAC_DISABLE_VECTOR_MEMORY": "1",
-		"MONITOR_PORT": "8765",
-		"DASHBOARD_PORT": "8766",
-		"MONITOR_HTTP_PORT": "8766",
-		"PYTHONUNBUFFERED": "1"
-	},
-	"forwardPorts": [8766, 8765],
-	"portsAttributes": {
-		"8766": {
-			"label": "Isaac Dashboard",
-			"onAutoForward": "openBrowser"
-		},
-		"8765": {
-			"label": "Isaac WebSocket",
-			"onAutoForward": "silent"
-		}
-	},
-	"customizations": {
-		"vscode": {
-			"settings": {
-				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
-				"python.terminal.activateEnvironment": true
-			},
-			"extensions": [
-				"ms-python.python"
-			]
-		}
-	},
-	"remoteUser": "vscode"
+  "name": "Isaac Kernel",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": false,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": false,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "none",
+      "installTools": true,
+      "optimize": true
+    }
+  },
+
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "32gb"
+  },
+
+  "containerEnv": {
+    "ISAAC_DISABLE_VECTOR_MEMORY": "1",
+    "MONITOR_PORT": "8765",
+    "DASHBOARD_PORT": "8766",
+    "MONITOR_HTTP_PORT": "8766",
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1"
+  },
+
+  "remoteEnv": {
+    "PATH": "${containerWorkspaceFolder}/.venv/bin:${containerEnv:PATH}",
+    "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv",
+    "GROQ_API_KEY": "${localEnv:GROQ_API_KEY}",
+    "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}",
+    "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
+    "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}",
+    "ACTIVE_PROVIDER": "${localEnv:ACTIVE_PROVIDER}",
+    "ISAAC_OWNER": "${localEnv:ISAAC_OWNER}"
+  },
+
+  "secrets": {
+    "GROQ_API_KEY": {
+      "description": "Groq API key (empfohlen für Codespaces, Free Tier). Wird als ACTIVE_PROVIDER=groq genutzt.",
+      "documentationUrl": "https://console.groq.com/keys"
+    },
+    "OPENROUTER_API_KEY": {
+      "description": "Optional: OpenRouter Multi-Model Gateway / Free-Ensemble.",
+      "documentationUrl": "https://openrouter.ai/keys"
+    },
+    "GOOGLE_API_KEY": {
+      "description": "Optional: Google AI Studio / Gemini API key.",
+      "documentationUrl": "https://aistudio.google.com/apikey"
+    },
+    "GEMINI_API_KEY": {
+      "description": "Optional: Alias für GOOGLE_API_KEY (falls du nur diesen Namen nutzt)."
+    },
+    "ACTIVE_PROVIDER": {
+      "description": "Optional Override: groq | openrouter | gemini | ollama | local (Default: groq)."
+    },
+    "ISAAC_OWNER": {
+      "description": "Optional: Owner-Name für Trust/Default-Kontext (Default: Steffen)."
+    }
+  },
+
+  "forwardPorts": [8766, 8765],
+  "portsAttributes": {
+    "8766": {
+      "label": "Isaac Dashboard (HTTP)",
+      "onAutoForward": "openBrowser",
+      "requireLocalPort": false,
+      "protocol": "http"
+    },
+    "8765": {
+      "label": "Isaac Monitor (WebSocket)",
+      "onAutoForward": "silent",
+      "requireLocalPort": false
+    }
+  },
+  "otherPortsAttributes": {
+    "onAutoForward": "silent"
+  },
+
+  "onCreateCommand": "echo '[Isaac] Devcontainer create — $(date -u +%Y-%m-%dT%H:%MZ)'",
+  "updateContentCommand": "bash .devcontainer/post-create.sh --update",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "waitFor": "postCreateCommand",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "python.testing.unittestEnabled": true,
+        "python.testing.pytestEnabled": false,
+        "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "tests_*.py"],
+        "editor.formatOnSave": false,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          ".venv": false,
+          "data/*.db": true
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.env.linux": {
+          "ISAAC_DISABLE_VECTOR_MEMORY": "1",
+          "PYTHONUNBUFFERED": "1"
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "github.copilot",
+        "github.copilot-chat",
+        "streetsidesoftware.code-spell-checker",
+        "redhat.vscode-yaml",
+        "editorconfig.editorconfig"
+      ]
+    },
+    "codespaces": {
+      "openFiles": ["docs/CODESPACES.md", "README.md", "AGENTS.md"]
+    }
+  }
 }

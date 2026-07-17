@@ -1,8 +1,28 @@
 # Isaac
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sco0rp88-ship-it/Isaac?quickstart=1)
+[![Python package](https://github.com/sco0rp88-ship-it/Isaac/actions/workflows/python-package.yml/badge.svg)](https://github.com/sco0rp88-ship-it/Isaac/actions/workflows/python-package.yml)
+
+
 Isaac ist ein persönliches, lokales, vertrauensbasiertes und entwicklungsfähiges KI-System. Dieses Repository ist nicht nur ein Chatbot- oder Agenten-Prototyp, sondern eine Architektur für ein kognitives, langfristig erweiterbares und kontrolliertes System.
 
 Dieses README dient als übergeordnete Arbeitsanweisung für jeden KI-Model, jeden Agenten und jede automatisierte Entwicklungs- oder Refactoring-Routine, die mit diesem Repository arbeitet.
+
+
+## Codespaces (empfohlen zum Starten in der Cloud)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sco0rp88-ship-it/Isaac?quickstart=1)
+[![Python package](https://github.com/sco0rp88-ship-it/Isaac/actions/workflows/python-package.yml/badge.svg)](https://github.com/sco0rp88-ship-it/Isaac/actions/workflows/python-package.yml)
+
+
+1. Button **Open in GitHub Codespaces** oder Repo → **Code → Codespaces → Create**.
+2. Secrets setzen (Repo → **Settings → Secrets and variables → Codespaces**):
+   - `GROQ_API_KEY` (empfohlen, Free Tier): https://console.groq.com/keys
+   - optional: `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`
+3. Nach dem Build: `bash .devcontainer/start-isaac.sh`
+4. Dashboard: Port **8766** (Browser öffnet automatisch).
+
+Details: [`docs/CODESPACES.md`](docs/CODESPACES.md)
 
 ## Grundprinzip: Das KI-Modell ist ein Ausführender, nicht die Quelle der Wahrheit
 

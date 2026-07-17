@@ -1,0 +1,63 @@
+# Keep Codespaces prebuild cache warm when the dev environment changes.
+# GitHub also offers UI prebuilds: Settings → Codespaces → Prebuilds.
+name: Codespaces prebuild signal
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".devcontainer/**"
+      - "requirements.txt"
+      - "requirements-free.txt"
+      - ".github/workflows/codespaces-prebuild.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: codespaces-prebuild-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-devcontainer:
+    name: Validate devcontainer config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          set -euo pipefail
+          test -f .devcontainer/devcontainer.json
+          test -f .devcontainer/post-create.sh
+          test -f .devcontainer/post-start.sh
+          test -f .devcontainer/start-isaac.sh
+          test -f .env.example
+          test -f requirements.txt
+          python3 -m json.tool .devcontainer/devcontainer.json > /dev/null
+          echo "devcontainer.json OK"
+
+      - name: Shell syntax
+        run: |
+          bash -n .devcontainer/post-create.sh
+          bash -n .devcontainer/post-start.sh
+          bash -n .devcontainer/start-isaac.sh
+
+      - name: Bootstrap smoke (no Playwright)
+        env:
+          ISAAC_DISABLE_VECTOR_MEMORY: "1"
+          ISAAC_SKIP_PLAYWRIGHT: "1"
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv
+          .venv/bin/pip install -q --upgrade pip
+          .venv/bin/pip install -q -r requirements.txt
+          mkdir -p logs runtime workspace data
+          if [ ! -f .env ]; then cp .env.example .env; fi
+          .venv/bin/python -m py_compile \
+            isaac_core.py executor.py low_complexity.py memory.py \
+            relay.py logic.py watchdog.py task_checkpoint.py
+          .venv/bin/python sanity_check.py
+          .venv/bin/python -m unittest \
+            tests_phase_a_stabilization \
+            tests_state_io \
+            tests_provider_configuration \
+            -q

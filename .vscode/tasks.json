@@ -1,0 +1,100 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Isaac: Start Kernel",
+      "type": "shell",
+      "command": "bash .devcontainer/start-isaac.sh",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ISAAC_DISABLE_VECTOR_MEMORY": "1",
+          "PYTHONUNBUFFERED": "1"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Isaac: Sanity Check",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python sanity_check.py",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ISAAC_DISABLE_VECTOR_MEMORY": "1"
+        }
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Isaac: Unit Tests (A-stabilization)",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python -m unittest tests_phase_a_stabilization tests_state_io tests_provider_configuration -v",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ISAAC_DISABLE_VECTOR_MEMORY": "1"
+        }
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Isaac: py_compile Core",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python -m py_compile isaac_core.py executor.py low_complexity.py memory.py relay.py logic.py watchdog.py task_checkpoint.py",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Isaac: Eval Harness",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python -m evals.eval_runner",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ISAAC_DISABLE_VECTOR_MEMORY": "1"
+        }
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Isaac: Bootstrap (post-create)",
+      "type": "shell",
+      "command": "bash .devcontainer/post-create.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "none"
+    },
+    {
+      "label": "Isaac: Free Cloud Mode",
+      "type": "shell",
+      "command": "bash scripts/run_free_cloud.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "none"
+    }
+  ]
+}

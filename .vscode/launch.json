@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Isaac: Kernel (isaac_core.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/isaac_core.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "ISAAC_DISABLE_VECTOR_MEMORY": "1",
+        "MONITOR_PORT": "8765",
+        "DASHBOARD_PORT": "8766",
+        "MONITOR_HTTP_PORT": "8766",
+        "PYTHONUNBUFFERED": "1",
+        "ISAAC_BIND_HOST": "0.0.0.0"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true
+    },
+    {
+      "name": "Isaac: Sanity Check",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/sanity_check.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "ISAAC_DISABLE_VECTOR_MEMORY": "1"
+      },
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Isaac: Unittest Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": ["${file}"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "env": {
+        "ISAAC_DISABLE_VECTOR_MEMORY": "1"
+      }
+    }
+  ]
+}
