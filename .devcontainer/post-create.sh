@@ -90,6 +90,10 @@ inject_secret GROQ_API_KEY
 inject_secret OPENROUTER_API_KEY
 inject_secret GOOGLE_API_KEY
 inject_secret GEMINI_API_KEY
+inject_secret XAI_API_KEY
+inject_secret GROK_API_KEY
+inject_secret OPENAI_API_KEY
+inject_secret COGNEE_API_KEY
 
 # Non-secret overrides from Codespaces env
 if [ -n "${ACTIVE_PROVIDER:-}" ]; then

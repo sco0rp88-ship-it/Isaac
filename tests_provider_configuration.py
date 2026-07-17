@@ -46,6 +46,24 @@ class TestProviderConfiguration(unittest.TestCase):
         self.assertEqual(gemini.api_key, "test-gemini-key")
         self.assertIn("generativelanguage.googleapis.com", gemini.base_url)
 
+    def test_xai_grok_provider_from_env(self):
+        env = {
+            "XAI_API_KEY": "xai-test-key-not-real",
+            "XAI_MODEL": "grok-3-mini",
+        }
+        with patch.dict("os.environ", env, clear=False):
+            os.environ.pop("GROK_API_KEY", None)
+            defaults = config_module._provider_defaults_from_env()
+        xai = defaults["xai"]
+        self.assertEqual(xai.provider_type, "openai_compat")
+        self.assertEqual(xai.api_key, "xai-test-key-not-real")
+        self.assertEqual(xai.model, "grok-3-mini")
+        self.assertIn("api.x.ai", xai.base_url)
+        self.assertTrue(xai.available)
+        grok = defaults["grok"]
+        self.assertEqual(grok.api_key, "xai-test-key-not-real")
+        self.assertIn("api.x.ai", grok.base_url)
+
     def test_local_openai_compat_provider_default_no_api_key(self):
         with patch.dict("os.environ", {}, clear=True):
             defaults = config_module._provider_defaults_from_env()

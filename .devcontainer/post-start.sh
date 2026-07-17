@@ -9,7 +9,7 @@ mkdir -p logs runtime workspace data
 
 # Re-inject secrets if Codespaces refreshed them (no values logged)
 if [ -f .env ] && [ -x .venv/bin/python ]; then
-  for key in GROQ_API_KEY OPENROUTER_API_KEY GOOGLE_API_KEY GEMINI_API_KEY; do
+  for key in GROQ_API_KEY OPENROUTER_API_KEY GOOGLE_API_KEY GEMINI_API_KEY XAI_API_KEY GROK_API_KEY OPENAI_API_KEY COGNEE_API_KEY; do
     val="${!key:-}"
     [ -z "$val" ] && continue
     .venv/bin/python - "$key" "$val" <<'PY'
