@@ -17,11 +17,13 @@ Dieses README dient als übergeordnete Arbeitsanweisung für jeden KI-Model, jed
 
 1. Button **Open in GitHub Codespaces** oder Repo → **Code → Codespaces → Create**.
 2. Secrets setzen (Repo → **Settings → Secrets and variables → Codespaces**):
-   - `GROQ_API_KEY` (empfohlen, Free Tier): https://console.groq.com/keys
-   - optional: `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`
+   - `ACTIVE_PROVIDER=gemini` + `GOOGLE_API_KEY` (Free AI Studio)
+   - optional: `GROQ_API_KEY`, `OPENROUTER_API_KEY`
 3. Nach dem Build: `bash .devcontainer/start-isaac.sh`
 4. Dashboard: Port **8766** (Browser öffnet automatisch).
 
+**Checkliste (5 Schritte):** [`docs/CODESPACES_CHECKLISTE.md`](docs/CODESPACES_CHECKLISTE.md)  
+**Haupt-Codespace:** https://isaac-main-qvvrvv7vg6xjc6x74.github.dev  
 Details: [`docs/CODESPACES.md`](docs/CODESPACES.md)
 
 ## Grundprinzip: Das KI-Modell ist ein Ausführender, nicht die Quelle der Wahrheit

@@ -4,6 +4,11 @@ One-click cloud dev environment for the Isaac kernel (Python 3.12, Dashboard, Te
 
 ## Open
 
+**5-Minuten-Checkliste:** [`CODESPACES_CHECKLISTE.md`](CODESPACES_CHECKLISTE.md)
+
+**Haupt-Codespace:** https://isaac-main-qvvrvv7vg6xjc6x74.github.dev
+
+
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sco0rp88-ship-it/Isaac?quickstart=1)
 
 Or: **Code → Codespaces → Create codespace on `main`**.

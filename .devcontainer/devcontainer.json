@@ -156,6 +156,7 @@
     },
     "codespaces": {
       "openFiles": [
+        "docs/CODESPACES_CHECKLISTE.md",
         "docs/CODESPACES.md",
         "README.md",
         "AGENTS.md"

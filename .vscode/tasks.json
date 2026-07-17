@@ -95,6 +95,20 @@
       },
       "problemMatcher": [],
       "group": "none"
+    },
+    {
+      "label": "Isaac: Codespaces Checkliste",
+      "type": "shell",
+      "command": "sed -n \"1,80p\" docs/CODESPACES_CHECKLISTE.md",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }
