@@ -43,4 +43,15 @@ S3 INQUIRY / RESEARCH / LEARN (an goal_id)
 STATUS 2026-07-17
 ──────────────────────────────────────────────────────────────────────────────
 S0–S4 Kernpfade implementiert und regression-getestet.
-Offen nur: Feinschliff (z. B. Owner-Antwort-Parser auf Digest-Fragen), keine Blocker.
+[x] Owner-Antwort auf Digest/Inquiry: Ziel-Antwort: … / id = text (2026-07-17)
+Offen: Feinschliff optional (z. B. multi-answer batch), keine Blocker.
+
+──────────────────────────────────────────────────────────────────────────────
+LIVE VALIDATION 2026-07-17 (Codespace + Render Fenster)
+──────────────────────────────────────────────────────────────────────────────
+[x] Render https://isaac-free.onrender.com/health → ok free_cloud openrouter
+[x] scripts/smoke_isaac.py hard_fail=0 (CS ports soft 404 ohne Kernel)
+[x] unittest 244 OK
+[ ] Manuell Kernel im CS: bash .devcontainer/start-isaac.sh → Port 8767
+    (API startet Codespace VM, startet nicht automatisch isaac_core)
+
