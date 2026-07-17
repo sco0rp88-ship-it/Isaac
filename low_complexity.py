@@ -89,6 +89,71 @@ _EXPLANATORY_CONTEXT_MARKERS = (
 )
 _ACTION_SHORT_MARKERS = ("mach", "weiter", "fortsetzen", "hilfe", "erklär", "erklär", "wer", "was", "wie", "warum")
 
+_ACTION_VERBS = (
+    "mach",
+    "erledige",
+    "erstelle",
+    "schreibe",
+    "verbinde",
+    "öffne",
+    "starte",
+    "installiere",
+    "führe",
+    "finde",
+    "zeige",
+    "lade",
+)
+
+# Imperative/action prefixes that should be treated as tool/agent requests
+_ACTION_PREFIXES = (
+    "mach ",
+    "mach:",
+    "erledige ",
+    "erledige:",
+    "erstelle ",
+    "erstelle:",
+    "erstelle datei",
+    "schreibe ",
+    "schreibe:",
+    "verbinde ",
+    "verbinde:",
+    "öffne ",
+    "öffne:",
+    "starte ",
+    "starte:",
+    "installiere ",
+    "installiere:",
+    "führe aus ",
+    "führe aus:",
+    "finde ",
+    "finde:",
+    "zeige ",
+    "zeige:",
+    "lade ",
+    "lade:",
+)
+
+_POLITE_PREFIXES = (
+    "bitte ",
+    "kannst du ",
+    "kannst du bitte ",
+    "könntest du ",
+    "könntest du bitte ",
+    "sollst du ",
+    "sollst du bitte ",
+)
+
+
+def _starts_with_action_request(normalized: str) -> bool:
+    if any(normalized.startswith(prefix) for prefix in _ACTION_PREFIXES):
+        return True
+
+    for prefix in _POLITE_PREFIXES:
+        if normalized.startswith(prefix):
+            remainder = normalized[len(prefix):]
+            return any(remainder.startswith(verb) for verb in _ACTION_VERBS)
+    return False
+
 
 def normalize_low_complexity(text: str) -> str:
     t = (text or "").strip().lower()
@@ -172,6 +237,14 @@ def classify_interaction_result(text: str) -> ClassificationResult:
                 has_question=has_question,
                 word_count=word_count,
             )
+
+    if _starts_with_action_request(normalized) and word_count >= 2:
+        return ClassificationResult(
+            interaction_class=InteractionClass.TOOL_REQUEST,
+            normalized_text=normalized,
+            has_question=has_question,
+            word_count=word_count,
+        )
 
     if normalized in _CLARIFY_MARKERS or (
         word_count <= 6 and

@@ -229,6 +229,22 @@ class TestCriticalBugs(unittest.TestCase):
         result = classify_interaction_result("bitte groq verbinden")
         self.assertEqual(result.interaction_class, InteractionClass.TOOL_REQUEST)
 
+    def test_bug_28_polite_imperative_is_tool_request(self):
+        result = classify_interaction_result("bitte verbinde groq")
+        self.assertEqual(result.interaction_class, InteractionClass.TOOL_REQUEST)
+
+    def test_bug_29_interrogative_action_request_is_tool_request(self):
+        result = classify_interaction_result("kannst du groq verbinden?")
+        self.assertEqual(result.interaction_class, InteractionClass.TOOL_REQUEST)
+
+    def test_bug_30_imperative_create_file_is_tool_request(self):
+        result = classify_interaction_result("erstelle datei test.txt mit inhalt hallo")
+        self.assertEqual(result.interaction_class, InteractionClass.TOOL_REQUEST)
+
+    def test_bug_31_open_browser_imperative_is_tool_request(self):
+        result = classify_interaction_result("öffne browser zu github.com")
+        self.assertEqual(result.interaction_class, InteractionClass.TOOL_REQUEST)
+
     def test_bug_26_kernel_detects_provision_all_providers_request(self):
         self.assertTrue(
             self.kernel._wants_provision_all_providers("hole alle api keys und verbinde alle provider")
