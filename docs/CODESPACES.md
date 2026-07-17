@@ -33,7 +33,8 @@ Repository → **Settings → Secrets and variables → Codespaces**
 
 | Secret | Required | Where |
 |--------|----------|--------|
-| `GROQ_API_KEY` | **Recommended** | https://console.groq.com/keys |
+| `GROQ_API_KEY` | **Recommended** (free) | https://console.groq.com/keys |
+| `XAI_API_KEY` / `GROK_API_KEY` | Optional (Grok) | https://console.x.ai |
 | `OPENROUTER_API_KEY` | Optional | https://openrouter.ai/keys |
 | `GOOGLE_API_KEY` / `GEMINI_API_KEY` | Optional | https://aistudio.google.com/apikey |
 | `ACTIVE_PROVIDER` | Optional | `groq` (default) / `openrouter` / `gemini` |

@@ -4,7 +4,6 @@
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -25,13 +24,11 @@
       "optimize": true
     }
   },
-
   "hostRequirements": {
     "cpus": 2,
     "memory": "4gb",
     "storage": "32gb"
   },
-
   "containerEnv": {
     "ISAAC_DISABLE_VECTOR_MEMORY": "1",
     "MONITOR_PORT": "8765",
@@ -41,7 +38,6 @@
     "PYTHONDONTWRITEBYTECODE": "1",
     "PIP_DISABLE_PIP_VERSION_CHECK": "1"
   },
-
   "remoteEnv": {
     "PATH": "${containerWorkspaceFolder}/.venv/bin:${containerEnv:PATH}",
     "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv",
@@ -50,12 +46,15 @@
     "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
     "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}",
     "ACTIVE_PROVIDER": "${localEnv:ACTIVE_PROVIDER}",
-    "ISAAC_OWNER": "${localEnv:ISAAC_OWNER}"
+    "ISAAC_OWNER": "${localEnv:ISAAC_OWNER}",
+    "XAI_API_KEY": "${localEnv:XAI_API_KEY}",
+    "GROK_API_KEY": "${localEnv:GROK_API_KEY}",
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
+    "COGNEE_API_KEY": "${localEnv:COGNEE_API_KEY}"
   },
-
   "secrets": {
     "GROQ_API_KEY": {
-      "description": "Groq API key (empfohlen für Codespaces, Free Tier). Wird als ACTIVE_PROVIDER=groq genutzt.",
+      "description": "Groq API key (empfohlen f\u00fcr Codespaces, Free Tier). Wird als ACTIVE_PROVIDER=groq genutzt.",
       "documentationUrl": "https://console.groq.com/keys"
     },
     "OPENROUTER_API_KEY": {
@@ -67,17 +66,32 @@
       "documentationUrl": "https://aistudio.google.com/apikey"
     },
     "GEMINI_API_KEY": {
-      "description": "Optional: Alias für GOOGLE_API_KEY (falls du nur diesen Namen nutzt)."
+      "description": "Optional: Alias f\u00fcr GOOGLE_API_KEY (falls du nur diesen Namen nutzt)."
     },
     "ACTIVE_PROVIDER": {
-      "description": "Optional Override: groq | openrouter | gemini | ollama | local (Default: groq)."
+      "description": "Optional: groq | xai | grok | openrouter | gemini | ollama | local (Default: groq)."
     },
     "ISAAC_OWNER": {
-      "description": "Optional: Owner-Name für Trust/Default-Kontext (Default: Steffen)."
+      "description": "Optional: Owner-Name f\u00fcr Trust/Default-Kontext (Default: Steffen)."
+    },
+    "XAI_API_KEY": {
+      "description": "xAI / Grok API key (console.x.ai). ACTIVE_PROVIDER=xai oder grok.",
+      "documentationUrl": "https://console.x.ai"
+    },
+    "GROK_API_KEY": {
+      "description": "Alias f\u00fcr XAI_API_KEY (Grok)."
+    },
+    "OPENAI_API_KEY": {
+      "description": "Optional OpenAI API key."
+    },
+    "COGNEE_API_KEY": {
+      "description": "Optional Cognee external memory key."
     }
   },
-
-  "forwardPorts": [8766, 8765],
+  "forwardPorts": [
+    8766,
+    8765
+  ],
   "portsAttributes": {
     "8766": {
       "label": "Isaac Dashboard (HTTP)",
@@ -94,13 +108,11 @@
   "otherPortsAttributes": {
     "onAutoForward": "silent"
   },
-
-  "onCreateCommand": "echo '[Isaac] Devcontainer create — $(date -u +%Y-%m-%dT%H:%MZ)'",
+  "onCreateCommand": "echo '[Isaac] Devcontainer create \u2014 $(date -u +%Y-%m-%dT%H:%MZ)'",
   "updateContentCommand": "bash .devcontainer/post-create.sh --update",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "postStartCommand": "bash .devcontainer/post-start.sh",
   "waitFor": "postCreateCommand",
-
   "customizations": {
     "vscode": {
       "settings": {
@@ -109,7 +121,13 @@
         "python.analysis.typeCheckingMode": "basic",
         "python.testing.unittestEnabled": true,
         "python.testing.pytestEnabled": false,
-        "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "tests_*.py"],
+        "python.testing.unittestArgs": [
+          "-v",
+          "-s",
+          ".",
+          "-p",
+          "tests_*.py"
+        ],
         "editor.formatOnSave": false,
         "files.exclude": {
           "**/__pycache__": true,
@@ -137,7 +155,11 @@
       ]
     },
     "codespaces": {
-      "openFiles": ["docs/CODESPACES.md", "README.md", "AGENTS.md"]
+      "openFiles": [
+        "docs/CODESPACES.md",
+        "README.md",
+        "AGENTS.md"
+      ]
     }
   }
 }
