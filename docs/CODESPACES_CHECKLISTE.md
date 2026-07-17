@@ -34,11 +34,28 @@ Warten bis `post-create` durch ist (venv, deps, sanity).
 ### 3) Kernel starten
 
 ```bash
+git pull origin main
 bash .devcontainer/start-isaac.sh
 ```
 
 Oder: **Terminal → Run Task → Isaac: Start Kernel**  
-Dashboard: Port **8766** · Monitor WS: **8765**
+**Terminal-Tab offen lassen.**
+
+In Codespaces setzt das Start-Skript standardmäßig **`ISAAC_UNIFIED_PORT=1`**:  
+HTTP-Dashboard und WebSocket (`/ws`) teilen sich **einen** Port (meist **8766**).
+
+| Port | Bedeutung | Im Browser öffnen? |
+|------|-----------|-------------------|
+| **8766** | Dashboard (HTML) | **Ja** ← diesen |
+| **8765** | oft reiner WebSocket | **Nein** |
+| **8767** | je nach Override | nur wenn Dashboard-HTML |
+
+**Falsch:** `…-8765.app.github.dev` → Meldung *„missing Connection header / You cannot access a WebSocket server directly with a browser“*.  
+**Richtig:** Panel **PORTS** → **8766** → Visibility **Public** → Browser-Icon.
+
+```text
+https://<codespace-name>-8766.app.github.dev/
+```
 
 ### 4) Tests (Regression)
 
@@ -106,9 +123,12 @@ Regeln: `AGENTS.md` — klein, validiert, Executor reklassifiziert nicht, normal
 |---------|-----|
 | Keine LLM-Antwort | Secrets + Rebuild; `ACTIVE_PROVIDER=gemini` |
 | Port 8766 zu | Kernel starten |
+| **WebSocket / Connection header** | Du hast den **WS-Port** geöffnet → **8766** nutzen; `git pull` + Start (Unified `/ws`) |
+| `cd /root/Isaac/isaac` Permission denied | Altes Skript → `git pull origin main`, dann `bash .devcontainer/start-isaac.sh` |
 | `.venv` fehlt | `bash .devcontainer/post-create.sh` |
 | Alte Secrets | Rebuild container |
 | Idle disconnected | Codespace erneut öffnen / Start |
+| Dashboard „offline“ | Kernel-Tab prüfen; Port Public; Unified-Port nach Pull |
 
 ---
 

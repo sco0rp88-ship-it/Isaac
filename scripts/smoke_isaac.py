@@ -88,6 +88,26 @@ def run_render(s: Smoke, base: str) -> None:
     except Exception as e:
         s.rec("R2", "Render dashboard HTML", False, e, soft=True)
 
+    # Live probe: monitor_config (unified /ws expected on free-cloud)
+    try:
+        code, body = s.http_get(f"{base}/monitor_config")
+        data = json.loads(body) if body.strip().startswith("{") else {}
+        ok = code == 200 and (
+            data.get("ws_same_origin") is True
+            or data.get("unified_port") is True
+            or data.get("ws_path") == "/ws"
+        )
+        s.rec(
+            "R3",
+            "Render /monitor_config (WS same-origin)",
+            ok,
+            f"unified={data.get('unified_port')} same_origin={data.get('ws_same_origin')} "
+            f"ws_path={data.get('ws_path')}",
+            soft=True,
+        )
+    except Exception as e:
+        s.rec("R3", "Render /monitor_config", False, e, soft=True)
+
 
 def run_codespace_ports(s: Smoke, host: str, ports: list[int]) -> None:
     host = host.replace("https://", "").replace("http://", "").strip("/")
@@ -108,8 +128,17 @@ def run_codespace_ports(s: Smoke, host: str, ports: list[int]) -> None:
             code, body = s.http_get(url, timeout=15)
             is_auth = "codespaces/auth" in body or "authUrl" in body
             is_isaac = ("Isaac" in body or "dashboard" in body.lower()) and not is_auth
+            ws_err = "missing Connection header" in body or "WebSocket client" in body
             if is_isaac:
                 s.rec(f"C{port}", f"Codespace :{port}", True, "Isaac UI")
+            elif ws_err:
+                s.rec(
+                    f"C{port}",
+                    f"Codespace :{port}",
+                    False,
+                    "raw WebSocket port opened in browser — use Dashboard HTTP :8766",
+                    soft=True,
+                )
             elif is_auth or code in (200, 401, 403):
                 s.rec(
                     f"C{port}",
@@ -243,6 +272,14 @@ def run_goal(s: Smoke) -> None:
             detect_intent("ziele digest") == Intent.GOAL_DIGEST,
             str(detect_intent("ziele digest")),
         )
+        # Owner-Antwort Intent (P3A)
+        if hasattr(Intent, "GOAL_ANSWER"):
+            s.rec(
+                "GA",
+                "Intent Ziel-Antwort",
+                detect_intent("Ziel-Antwort: Test") == Intent.GOAL_ANSWER,
+                str(detect_intent("Ziel-Antwort: Test")),
+            )
     except Exception as e:
         s.rec("GD", "ziele digest", False, e)
 
